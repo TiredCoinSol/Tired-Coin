@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>$TIRED — CHARGE ME</title>
+<meta name="description" content="$TIRED — Everyone’s tired. Charge the bar.">
+<link href="https://fonts.googleapis.com/css2?family=Chewy&family=Patrick+Hand:wght@400&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f9f7f3;         /* off-white paper */
+    --ink:#0b0b0b;           /* marker black */
+    --red:#ff3b30;           /* iOS low-battery red */
+    --green:#2ecc71;         /* charge green (only near full) */
+    --blue:#1e90ff;          /* link accent */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Patrick Hand', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+
+  /* tiny paper noise */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none;
+    background-image: radial-gradient(rgba(0,0,0,.03) 1px, transparent 1px);
+    background-size: 3px 3px; opacity:.35;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;padding:24px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .title{
+    display:flex; gap:14px; align-items:center;
+    font-family:'Chewy', cursive; letter-spacing:1px;
+  }
+  .title h1{font-size:44px; line-height:1; margin:0}
+  .tag{font-size:16px; margin-top:4px; opacity:.85}
+
+  /* marker buttons */
+  .links{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{
+    appearance:none; border:none; background:#fff;
+    padding:12px 16px; border-radius:12px;
+    box-shadow: 0 0 0 4px var(--ink) inset, 3px 3px 0 0 var(--ink);
+    transition:transform .08s ease; font-size:18px; cursor:pointer;
+  }
+  .btn:active{transform:translate(2px,2px); box-shadow:0 0 0 4px var(--ink) inset, 1px 1px 0 0 var(--ink)}
+  .btn.red{background:var(--red); color:#fff}
+  .btn.blue{background:#fff; color:var(--ink)}
+  .btn a{color:inherit; text-decoration:none}
+
+  /* hero grid */
+  .hero{display:grid; grid-template-columns: 1.1fr 1fr; gap:24px}
+  @media (max-width:980px){ .hero{grid-template-columns:1fr} }
+
+  .card{
+    background:#fff; border-radius:20px; padding:20px;
+    box-shadow: 0 0 0 4px var(--ink) inset, 6px 6px 0 0 var(--ink);
+  }
+
+  /* hand-drawn battery */
+  .battery-wrap{display:flex; flex-direction:column; gap:16px}
+  .headline{font-family:'Chewy', cursive; font-size:54px; margin:0 0 6px 0; letter-spacing:1px}
+  .sub{font-size:18px; margin:0 0 10px 0; opacity:.85}
+
+  .battery{
+    position:relative; width:100%; height:120px;
+    border-radius:16px; background:#fff;
+    box-shadow: 0 0 0 6px var(--ink) inset;
+    overflow:hidden;
+  }
+  /* battery nub */
+  .battery::after{
+    content:""; position:absolute; right:-26px; top:36px; width:22px; height:48px;
+    background:#fff; box-shadow: 0 0 0 6px var(--ink) inset; border-radius:6px;
+  }
+  .fill{
+    --p:1%; /* default */
+    position:absolute; left:0; top:0; bottom:0;
+    width:var(--p);
+    background:linear-gradient(90deg, var(--red) 0%, var(--red) 60%, var(--green) 100%);
+    transition: width .8s ease;
+  }
+  .percent{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Chewy', cursive; font-size:32px; letter-spacing:1px; text-shadow:0 2px #fff;
+    mix-blend-mode:darken;
+  }
+
+  /* hand-drawn icon group under the battery */
+  .icons{display:flex; gap:14px; flex-wrap:wrap}
+  .pill{
+    background:#fff; padding:10px 14px; border-radius:12px;
+    box-shadow: 0 0 0 4px var(--ink) inset, 4px 4px 0 0 var(--ink);
+    font-size:18px;
+  }
+
+  /* right column */
+  h2{font-family:'Chewy', cursive; margin:0 0 8px 0}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+  .code{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    background:#fff; padding:10px 12px; border-radius:12px;
+    box-shadow: 0 0 0 4px var(--ink) inset, 4px 4px 0 0 var(--ink);
+    font-size:16px;
+  }
+  .copy{padding:8px 10px; font-size:16px}
+
+  iframe.chart{width:100%; height:420px; border:0; border-radius:16px;
+    box-shadow: 0 0 0 4px var(--ink) inset, 6px 6px 0 0 var(--ink); background:#fff}
+
+  .milestones{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+  @media (max-width:680px){ .milestones{grid-template-columns:1fr 1fr} }
+  .ms{background:#fff; padding:12px; border-radius:12px;
+    box-shadow: 0 0 0 4px var(--ink) inset, 4px 4px 0 0 var(--ink); font-size:16px}
+  .ms .cap{font-family:'Chewy', cursive}
+  .ms.unlocked{background:#eaffef}
+
+  footer{margin:22px 0 4px; text-align:center; opacity:.8; font-size:14px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <!-- inline SVG battery logo -->
+        <svg width="54" height="54" viewBox="0 0 120 120" aria-hidden="true">
+          <rect x="10" y="18" width="84" height="88" rx="12" fill="#fff" stroke="var(--ink)" stroke-width="10"/>
+          <rect x="36" y="6" width="32" height="18" rx="4" fill="#fff" stroke="var(--ink)" stroke-width="10"/>
+          <path d="M60 40 l-12 22 h16 l-10 20" fill="none" stroke="var(--ink)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="18" y="86" width="68" height="14" rx="6" fill="var(--red)" />
+        </svg>
+        <div>
+          <h1 style="margin:0; font-size:36px;">$TIRED</h1>
+          <div class="tag">Everyone’s tired. <strong>CHARGE ME.</strong></div>
+        </div>
+      </div>
+      <div class="links">
+        <a id="buy1" class="btn red" target="_blank" rel="noopener">☕ Refill (Pump.fun)</a>
+        <a id="tw" class="btn blue" target="_blank" rel="noopener">𝕏 Twitter</a>
+        <a id="chart1" class="btn blue" target="_blank" rel="noopener">📈 Chart</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <!-- LEFT: Battery + vibe -->
+      <div class="card">
+        <h1 class="headline">CHARGE ME</h1>
+        <p class="sub">Phone at 1%. Eyes at 1%. Wallet at… we’ll fix that.</p>
+
+        <div class="battery-wrap">
+          <div class="battery" aria-label="Battery">
+            <div id="fill" class="fill"></div>
+            <div class="percent"><span id="pctText">1%</span></div>
+          </div>
+
+          <div class="icons" aria-hidden="true">
+            <div class="pill">💤 zzz</div>
+            <div class="pill">⏰ snooze</div>
+            <div class="pill">☕ more coffee</div>
+            <div class="pill">🔌 plug it in</div>
+          </div>
+
+          <p id="mcLine" style="margin:10px 2px 0 2px; font-size:18px">MC: —</p>
+        </div>
+      </div>
+
+      <!-- RIGHT: Lore + CA + Chart -->
+      <div class="card">
+        <h2>Lore</h2>
+        <p style="margin:6px 0 12px">
+          <strong>$TIRED</strong> is the internet’s group battery. The bar fills as the market cap grows.
+          Hit milestones, unlock fresh memes, don’t forget to press the **Refill** button.
+        </p>
+
+        <div class="code">
+          <div>CA:&nbsp;<span id="ca" class="mono"></span></div>
+          <button id="copy" class="btn copy">Copy</button>
+        </div>
+
+        <div class="links" style="margin-top:10px">
+          <a id="buy2" class="btn red" target="_blank" rel="noopener">☕ Refill</a>
+          <a id="chart2" class="btn blue" target="_blank" rel="noopener">📈 Open Chart</a>
+        </div>
+
+        <h2 style="margin-top:16px">Milestones</h2>
+        <div id="ms" class="milestones"></div>
+
+        <h2 style="margin-top:16px">Live Chart</h2>
+        <iframe id="chart" class="chart" allow="clipboard-write; fullscreen"></iframe>
+      </div>
+    </section>
+
+    <footer>© <span id="yr"></span> $TIRED — Charge responsibly.</footer>
+  </div>
+
+<script>
+  // ======================
+  // CONFIG (edit these)
+  // ======================
+  const CONFIG = {
+    NAME: "$TIRED",
+    CA: "PASTE_YOUR_CONTRACT_ADDRESS_HERE",
+    PUMPFUN_URL: "https://pump.fun/coin/PASTE_YOUR_COIN_ID",
+    TWITTER_URL: "https://x.com/yourhandle",
+    DEX_URL: "https://dexscreener.com/solana/PASTE_PAIR_ID?embed=1&theme=dark",
+
+    // Market cap that equals 100% battery
+    MC_CAP_AT_100: 1000000, // $1,000,000
+
+    // Milestones shown on page
+    MILESTONES: [
+      { cap: 50000,  label: "First sip hits" },
+      { cap: 100000, label: "Eyes 20% open" },
+      { cap: 250000, label: "Brain online" },
+      { cap: 500000, label: "Second wind" },
+      { cap: 750000, label: "No more snooze" },
+      { cap: 1000000, label: "Full charge (for now)" }
+    ]
+  };
+
+  // ========= helpers
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const params = new URLSearchParams(location.search);
+  function fmtUSD(n){ return n==null ? "—" : "$" + Number(n).toLocaleString(undefined,{maximumFractionDigits:0}); }
+
+  // ========= wire links
+  $("#yr").textContent = new Date().getFullYear();
+  $("#ca").textContent = CONFIG.CA;
+  $("#buy1").href = $("#buy2").href = CONFIG.PUMPFUN_URL;
+  $("#tw").href = CONFIG.TWITTER_URL;
+  $("#chart1").href = $("#chart2").href = CONFIG.DEX_URL;
+  $("#chart").src = CONFIG.DEX_URL;
+
+  // ========= milestones
+  const msWrap = $("#ms");
+  CONFIG.MILESTONES.forEach(m=>{
+    const d = document.createElement('div');
+    d.className = "ms";
+    d.innerHTML = `<div class="cap">${fmtUSD(m.cap)}</div><div>${m.label}</div>`;
+    msWrap.appendChild(d);
+  });
+
+  // ========= battery logic
+  const DEFAULT_MC = 10000;
+  let mc = Number(params.get('mc') ?? DEFAULT_MC);
+  $("#mcLine").textContent = "MC: " + fmtUSD(mc);
+
+  function setEnergyFromMC(v){
+    const pct = Math.max(1, Math.min(100, Math.round((v / CONFIG.MC_CAP_AT_100) * 100)));
+    $("#fill").style.setProperty('--p', pct + '%');
+    $("#pctText").textContent = pct + "%";
+
+    // Unlock milestones
+    $$(".ms").forEach((el, i)=>{
+      if(v >= CONFIG.MILESTONES[i].cap){ el.classList.add("unlocked"); }
+      else { el.classList.remove("unlocked"); }
+    });
+  }
+  setEnergyFromMC(mc);
+
+  // ========= copy CA
+  $("#copy").addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(CONFIG.CA);
+      const t = $("#copy"); const o = t.textContent; t.textContent = "Copied!";
+      setTimeout(()=>t.textContent=o, 1200);
+    }catch(e){ alert("Copy failed. Long-press to select."); }
+  });
+
+  // ========= dev mini-panel (?dev=1)
+  if(params.get('dev') === '1'){
+    const dev = document.createElement('div');
+    dev.style.cssText = "position:fixed;right:12px;bottom:12px;background:#fff;padding:10px;border-radius:12px;box-shadow:0 0 0 4px var(--ink) inset, 4px 4px 0 0 var(--ink);display:flex;gap:8px;align-items:center;z-index:50";
+    dev.innerHTML = `<span style="font-family:'Chewy',cursive">Dev MC</span>
+      <input id="mcIn" type="number" step="1000" value="${mc}" style="width:130px;padding:6px;border-radius:8px;border:2px solid var(--ink)">
+      <button id="mcSet" class="btn">Set</button>`;
+    document.body.appendChild(dev);
+    $("#mcSet").onclick = ()=>{
+      mc = Number($("#mcIn").value||0);
+      $("#mcLine").textContent = "MC: " + fmtUSD(mc);
+      setEnergyFromMC(mc);
+    };
+  }
+</script>
+</body>
+<footer>
+    © <span id="yr"></span> $TIRED — Charge responsibly.
+    <div style="margin-top:12px; font-size:12px; line-height:1.5; max-width:720px; margin-inline:auto; opacity:.75">
+      <strong>Disclaimer:</strong> $TIRED is a meme coin created purely for entertainment purposes and has no intrinsic value or expectation of profit. 
+      Nothing on this site constitutes financial advice. By interacting with this token, you acknowledge that all actions are your own responsibility, 
+      and the creators assume no liability for losses, errors, or outcomes. Cryptocurrency investments are highly volatile — never invest more than you 
+      are willing to lose.
+    </div>
+  </footer>
+  
+</html>
